@@ -15,7 +15,13 @@ from labelscope.epl2.renderer import render
 def _install_fake_treepoem(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
     captured: dict[str, Any] = {}
 
-    def fake_generate_barcode(barcode_type: str, data: str, options: dict[str, Any]) -> Image.Image:
+    def fake_generate_barcode(
+        barcode_type: str,
+        data: str,
+        options: dict[str, Any],
+        *,
+        scale: int = 2,
+    ) -> Image.Image:
         captured["barcode_type"] = barcode_type
         captured["data"] = data
         captured["options"] = options
@@ -27,23 +33,28 @@ def _install_fake_treepoem(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
     return captured
 
 
-def test_b_qr_defaults_model2_eccm_mag3(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_b_qr_defaults_model2_eccm_mag3_with_zd410_calibration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     captured = _install_fake_treepoem(monkeypatch)
     source = b'N\nQ100,10\nq200\nb20,20,Q,"hello"\nP1\n'
     img = render(source)
+    # Model 2 uses the default "qrcode" symbology and omits BWIPP's
+    # ``version`` option so it can auto-pick symbol size (1-40).
     assert captured["barcode_type"] == "qrcode"
     assert captured["data"] == "hello"
-    assert captured["options"]["version"] == 2
+    assert "version" not in captured["options"]
     assert captured["options"]["eclevel"] == "M"
-    # Default magnification 3 → 8x8 stub scaled to 24x24.
-    # The image contains that ink block at (20, 20).
+    # Default magnification 3 * ZD410 calibration 0.50 = 1.5.
+    # 8x8 stub scaled to round(8 * 1.5) = 12x12.
     assert img.getpixel((20, 20)) == 0
-    assert img.getpixel((20 + 24 - 1, 20 + 24 - 1)) == 0
+    assert img.getpixel((20 + 12 - 1, 20 + 12 - 1)) == 0
 
 
 def test_b_qr_honors_explicit_params(monkeypatch: pytest.MonkeyPatch) -> None:
     captured = _install_fake_treepoem(monkeypatch)
     source = b'N\nQ100,10\nq200\nb20,20,Q,m2,s5,eH,"hi"\nP1\n'
     render(source)
-    assert captured["options"]["version"] == 2
+    assert captured["barcode_type"] == "qrcode"
+    assert "version" not in captured["options"]
     assert captured["options"]["eclevel"] == "H"

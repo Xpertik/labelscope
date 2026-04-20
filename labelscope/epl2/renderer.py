@@ -36,6 +36,16 @@ from labelscope.epl2.parser import parse
 
 __all__ = ["Renderer", "render"]
 
+# Empirical calibration factor for QR output on a Zebra ZD410 at 203 DPI.
+# Calibrated visually against physical printed labels: at default
+# magnification=3 the rendered QR matches an 18 mm physical symbol.
+# BWIPP's raw output (at treepoem ``scale=1``) is substantially larger
+# than what the ZD410 actually lays down per module, so this factor
+# scales the final QR down. See ``sdd/labelscope-epl2-mvp/bug-fixes``
+# (topic engram) for measurements. Adjust only if targeting a different
+# printer.
+_ZEBRA_ZD410_QR_CALIBRATION: float = 0.50
+
 # BWIPP symbology names keyed by EPL2 ``B`` selector. See
 # ``docs/epl2-reference.md`` "Barcode symbology map".
 _B_SYMBOLOGY_MAP: dict[str, str] = {
@@ -106,8 +116,10 @@ class Renderer:
         canvas = Canvas(width=max(ctx.width, 1), height=max(ctx.height, 1))
         for cmd in ctx.draw_commands:
             self._draw(cmd, canvas, ctx)
-        if ctx.orientation == "B":
-            canvas.transpose_180()
+        # `Z` (ZT/ZB) is a printer feed-direction command, not a visual
+        # rotation: empirically the physical label reads in program
+        # coordinates regardless of ZT or ZB. We keep the orientation in
+        # context for metadata/debug only and do not transpose the canvas.
         return canvas.to_pil()
 
     def render_file(self, path: str | Path) -> Image.Image:
@@ -191,7 +203,10 @@ class Renderer:
             return
         raster = self._build_text_raster(cmd)
         rotated = rotate_quarter(raster, cmd.rotation)
-        canvas.draw_text_bitmap(rotated, x=cmd.x + ctx.ref_x, y=cmd.y + ctx.ref_y)
+        dx, dy = _rotation_anchor_offset(cmd.rotation, rotated.size)
+        canvas.draw_text_bitmap(
+            rotated, x=cmd.x + ctx.ref_x + dx, y=cmd.y + ctx.ref_y + dy
+        )
 
     def _build_text_raster(self, cmd: ACommand) -> Image.Image:
         """Build the logical (pre-rotation) text raster for an ``A`` command.
@@ -232,15 +247,18 @@ class Renderer:
         if cmd.data == "":
             return
         symbology = _B_SYMBOLOGY_MAP.get(cmd.symbology, "code128")
-        scale = max(cmd.narrow, 1)
         img = render_1d(
             symbology=symbology,
             data=cmd.data,
-            scale=scale,
+            narrow=max(cmd.narrow, 1),
+            height=max(cmd.height, 1),
             human_readable=cmd.human_readable,
         )
         rotated = rotate_quarter(img, cmd.rotation)
-        canvas.draw_text_bitmap(rotated, x=cmd.x + ctx.ref_x, y=cmd.y + ctx.ref_y)
+        dx, dy = _rotation_anchor_offset(cmd.rotation, rotated.size)
+        canvas.draw_text_bitmap(
+            rotated, x=cmd.x + ctx.ref_x + dx, y=cmd.y + ctx.ref_y + dy
+        )
 
     def _draw_b2d(self, cmd: bCommand, canvas: Canvas, ctx: _RenderContext) -> None:
         """Render a ``b`` 2D barcode (QR) command onto the canvas."""
@@ -248,12 +266,13 @@ class Renderer:
             return
         symbology = _b_SYMBOLOGY_MAP.get(cmd.symbology, "qrcode")
         model, magnification, ecc, _input_mode = _parse_qr_params(cmd.params)
+        effective_mag = magnification * _ZEBRA_ZD410_QR_CALIBRATION
         img = render_2d(
             symbology=symbology,
             data=cmd.data,
             model=model,
             ecc=ecc,
-            magnification=magnification,
+            magnification=effective_mag,
         )
         canvas.draw_text_bitmap(img, x=cmd.x + ctx.ref_x, y=cmd.y + ctx.ref_y)
 
@@ -271,10 +290,42 @@ def render(source: bytes | str, *, dpi: int = 203) -> Image.Image:
     return Renderer(dpi=dpi).render(source)
 
 
+def _rotation_anchor_offset(rotation: int, size: tuple[int, int]) -> tuple[int, int]:
+    """Return paste-offset (dx, dy) so the EPL2 (x, y) anchor lands at the
+    correct corner of the rotated bounding box.
+
+    Per Zebra EPL2 convention the anchor "rotates" with the text: top-left
+    for 0°, top-right for 90° CW, bottom-right for 180°, bottom-left for
+    270° CW. This mirrors how the printer places the first glyph.
+
+    Args:
+        rotation: EPL2 rotation code (0/1/2/3).
+        size: ``(width, height)`` of the already-rotated raster.
+
+    Returns:
+        Offset ``(dx, dy)`` to subtract from the paste position.
+    """
+    w, h = size
+    match rotation:
+        case 0:
+            return (0, 0)
+        case 1:
+            return (-w, 0)
+        case 2:
+            return (-w, -h)
+        case 3:
+            return (0, -h)
+        case _:
+            return (0, 0)
+
+
 def _parse_qr_params(params: str) -> tuple[int, int, str, str]:
     """Parse the QR ``b`` params string into ``(model, mag, ecc, input)``.
 
-    Defaults per Req RQR1: Model 2, magnification 3, ECC ``M``, input ``A``.
+    Defaults per Req RQR1: Model 2, magnification 3, ECC ``M``,
+    input ``A``. Final QR dimensions are then scaled by the
+    ``_ZEBRA_ZD410_QR_CALIBRATION`` factor so the physical output matches
+    the reference Zebra ZD410 printer (mag=3 ≈ 18 mm at 203 DPI).
 
     Args:
         params: Raw comma-joined params from ``bCommand.params``.

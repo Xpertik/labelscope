@@ -18,7 +18,13 @@ from tests.conftest import EPL_FILES
 def _fake_treepoem(monkeypatch: pytest.MonkeyPatch) -> None:
     """Stub treepoem so fixtures with QR/Code128 don't need a real backend."""
 
-    def fake_generate_barcode(barcode_type: str, data: str, options: dict[str, Any]) -> Image.Image:
+    def fake_generate_barcode(
+        barcode_type: str,
+        data: str,
+        options: dict[str, Any],
+        *,
+        scale: int = 2,
+    ) -> Image.Image:
         # Tiny all-ink stub; avoids any real BWIPP dependency.
         return Image.new("1", (8, 8), color=0)
 

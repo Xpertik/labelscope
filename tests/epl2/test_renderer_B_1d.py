@@ -16,7 +16,13 @@ def _install_fake_treepoem(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
     """Install a fake ``treepoem`` module and capture ``generate_barcode`` args."""
     captured: dict[str, Any] = {}
 
-    def fake_generate_barcode(barcode_type: str, data: str, options: dict[str, Any]) -> Image.Image:
+    def fake_generate_barcode(
+        barcode_type: str,
+        data: str,
+        options: dict[str, Any],
+        *,
+        scale: int = 2,
+    ) -> Image.Image:
         captured["barcode_type"] = barcode_type
         captured["data"] = data
         captured["options"] = options

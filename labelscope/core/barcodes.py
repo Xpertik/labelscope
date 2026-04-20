@@ -43,18 +43,25 @@ def _import_treepoem() -> Any:
 def render_1d(
     symbology: str,
     data: str,
-    scale: int,
+    narrow: int,
+    height: int,
     human_readable: bool,
 ) -> PILImage:
     """Render a 1D barcode via treepoem/BWIPP.
 
     Code 128 is force-switched to subset B by prefixing ``^104`` and
-    enabling BWIPP's ``parse`` option.
+    enabling BWIPP's ``parse`` option. The output is scaled so each narrow
+    module is ``narrow`` dots wide (horizontal) and the overall barcode
+    is exactly ``height`` dots tall (vertical). When ``human_readable`` is
+    ``True`` the HRI text is included in the ``height`` budget — callers
+    wanting unsquashed HRI should keep the text as a separate ``A``
+    command and pass ``human_readable=False``.
 
     Args:
         symbology: BWIPP symbology name (e.g. ``"code128"``, ``"upca"``).
         data: Barcode payload.
-        scale: Integer module-width scaling factor (pixel doubling).
+        narrow: Narrow module width in dots (EPL2 ``B`` param 5).
+        height: Target total image height in dots (EPL2 ``B`` param 7).
         human_readable: When ``True``, draw the HRI text line.
 
     Returns:
@@ -66,17 +73,19 @@ def render_1d(
     if symbology == "code128":
         options["parse"] = True
         payload = f"^104{data}"
+    # scale=1 gives 1 pixel per BWIPP module so our `narrow`/`height`
+    # math is absolute (not compounded over treepoem's default scale=2).
     raw: PILImage = treepoem.generate_barcode(
         barcode_type=symbology,
         data=payload,
         options=options,
+        scale=1,
     )
     img = raw.convert("1", dither=Image.Dither.NONE)
-    if scale > 1:
-        img = img.resize(
-            (img.size[0] * scale, img.size[1] * scale),
-            resample=Image.Resampling.NEAREST,
-        )
+    new_w = img.size[0] * max(narrow, 1)
+    new_h = max(height, 1)
+    if (new_w, new_h) != img.size:
+        img = img.resize((new_w, new_h), resample=Image.Resampling.NEAREST)
     return img
 
 
@@ -85,35 +94,41 @@ def render_2d(
     data: str,
     model: int,
     ecc: str,
-    magnification: int,
+    magnification: float,
 ) -> PILImage:
     """Render a 2D barcode (QR) via treepoem/BWIPP.
+
+    ``model`` selects the QR specification: Model 2 (default, modern) uses
+    BWIPP's ``qrcode`` symbology with no ``version`` option so BWIPP can
+    auto-select the minimum symbol version (1-40) that fits the payload.
+    Model 1 uses the legacy symbology ``qrcode1``.
 
     Args:
         symbology: BWIPP symbology name (e.g. ``"qrcode"``).
         data: Payload to encode.
         model: QR model number (1 or 2).
         ecc: Error-correction level (``"L"``/``"M"``/``"Q"``/``"H"``).
-        magnification: Integer module-size multiplier applied post-render.
+        magnification: Module-size multiplier applied post-render. Float
+            values are supported so callers can apply a printer-specific
+            calibration factor (the final pixel dims are rounded).
 
     Returns:
         A ``PIL.Image`` in mode ``"1"`` holding the rendered symbol.
     """
     treepoem = _import_treepoem()
-    options: dict[str, Any] = {
-        "version": model,
-        "eclevel": ecc,
-        "format": "full",
-    }
+    effective_symbology = "qrcode1" if model == 1 and symbology == "qrcode" else symbology
+    options: dict[str, Any] = {"eclevel": ecc}
+    # scale=1 gives 1 pixel per BWIPP module so `magnification` is absolute
+    # module-size-in-dots (not compounded over treepoem's default scale=2).
     raw: PILImage = treepoem.generate_barcode(
-        barcode_type=symbology,
+        barcode_type=effective_symbology,
         data=data,
         options=options,
+        scale=1,
     )
     img = raw.convert("1", dither=Image.Dither.NONE)
-    if magnification > 1:
-        img = img.resize(
-            (img.size[0] * magnification, img.size[1] * magnification),
-            resample=Image.Resampling.NEAREST,
-        )
+    new_w = max(1, int(round(img.size[0] * magnification)))
+    new_h = max(1, int(round(img.size[1] * magnification)))
+    if (new_w, new_h) != img.size:
+        img = img.resize((new_w, new_h), resample=Image.Resampling.NEAREST)
     return img
