@@ -49,7 +49,7 @@ def _font_file_path() -> str:
     Returns:
         Absolute path to the bundled TTF, extracted from package data.
     """
-    resource = files("labelscope.core").joinpath("_fonts", "DejaVuSansMono.ttf")
+    resource = files("labelscope.core").joinpath("_fonts").joinpath("DejaVuSansMono.ttf")
     with as_file(resource) as path:
         return str(path)
 
@@ -79,9 +79,7 @@ class FontRegistry:
         """
         key = (font_number, dpi)
         if key not in _CELL_TABLE:
-            raise ValueError(
-                f"Unsupported font/dpi combination: font={font_number}, dpi={dpi}"
-            )
+            raise ValueError(f"Unsupported font/dpi combination: font={font_number}, dpi={dpi}")
         base_w, base_h = _CELL_TABLE[key]
         return CellMetrics(width=base_w * h_mult, height=base_h * v_mult)
 

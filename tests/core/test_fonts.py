@@ -19,9 +19,7 @@ from labelscope.core.fonts import CellMetrics, FontRegistry
         (2, 2, 3, CellMetrics(width=20, height=48)),
     ],
 )
-def test_cell_metrics_203dpi(
-    font_num: int, h: int, v: int, expected: CellMetrics
-) -> None:
+def test_cell_metrics_203dpi(font_num: int, h: int, v: int, expected: CellMetrics) -> None:
     assert FontRegistry.cell_metrics(font_num, h, v, dpi=203) == expected
 
 

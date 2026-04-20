@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "labelscope"
-version = "0.0.1"
-description = "Python SDK and viewer to preview thermal printer labels (EPL2, with ZPL planned) from their source code."
+version = "0.1.0"
+description = "Deterministic Pillow-based renderer for Zebra EPL2 labels (ZD410 / 203 DPI) with QR, Code 128, UPC-A, and EAN-13 support."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
@@ -15,7 +15,7 @@ authors = [
 ]
 keywords = ["epl2", "zpl", "thermal-printer", "zebra", "label", "preview", "barcode"]
 classifiers = [
-    "Development Status :: 1 - Planning",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",

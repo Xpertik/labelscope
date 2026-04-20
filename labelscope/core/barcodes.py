@@ -31,7 +31,7 @@ def _import_treepoem() -> Any:
         BarcodeBackendMissing: If ``treepoem`` cannot be imported.
     """
     try:
-        import treepoem  # type: ignore[import-untyped]
+        import treepoem
     except ImportError as exc:
         raise BarcodeBackendMissing(
             "treepoem is required for barcode rendering. "

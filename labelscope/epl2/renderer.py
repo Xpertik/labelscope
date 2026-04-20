@@ -47,13 +47,16 @@ __all__ = ["Renderer", "render"]
 _ZEBRA_ZD410_QR_CALIBRATION: float = 0.50
 
 # BWIPP symbology names keyed by EPL2 ``B`` selector. See
-# ``docs/epl2-reference.md`` "Barcode symbology map".
+# ``docs/epl2-reference.md`` "Barcode symbology map". ``E`` and ``UA`` are
+# bare-family fallbacks for clients that omit the trailing numeric variant.
 _B_SYMBOLOGY_MAP: dict[str, str] = {
     "1B": "code128",
     "1": "code128",
     "UA0": "upca",
+    "UA": "upca",
     "E30": "ean13",
     "E80": "ean8",
+    "E": "ean13",
     "3": "code39",
     "9": "code93",
 }
@@ -204,9 +207,7 @@ class Renderer:
         raster = self._build_text_raster(cmd)
         rotated = rotate_quarter(raster, cmd.rotation)
         dx, dy = _rotation_anchor_offset(cmd.rotation, rotated.size)
-        canvas.draw_text_bitmap(
-            rotated, x=cmd.x + ctx.ref_x + dx, y=cmd.y + ctx.ref_y + dy
-        )
+        canvas.draw_text_bitmap(rotated, x=cmd.x + ctx.ref_x + dx, y=cmd.y + ctx.ref_y + dy)
 
     def _build_text_raster(self, cmd: ACommand) -> Image.Image:
         """Build the logical (pre-rotation) text raster for an ``A`` command.
@@ -256,9 +257,7 @@ class Renderer:
         )
         rotated = rotate_quarter(img, cmd.rotation)
         dx, dy = _rotation_anchor_offset(cmd.rotation, rotated.size)
-        canvas.draw_text_bitmap(
-            rotated, x=cmd.x + ctx.ref_x + dx, y=cmd.y + ctx.ref_y + dy
-        )
+        canvas.draw_text_bitmap(rotated, x=cmd.x + ctx.ref_x + dx, y=cmd.y + ctx.ref_y + dy)
 
     def _draw_b2d(self, cmd: bCommand, canvas: Canvas, ctx: _RenderContext) -> None:
         """Render a ``b`` 2D barcode (QR) command onto the canvas."""

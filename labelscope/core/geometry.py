@@ -11,11 +11,11 @@ from dataclasses import dataclass
 
 from PIL import Image
 
-# EPL2 ``p3`` rotation code (0/1/2/3 = 0/90/180/270 CW) → Pillow Transpose.
+# EPL2 ``p3`` rotation code (1/2/3 = 90/180/270 CW) → Pillow Transpose.
 # Pillow's ``ROTATE_90`` is counter-clockwise, so EPL2 1 (90 CW) maps to
-# ``ROTATE_270`` and EPL2 3 (270 CW) maps to ``ROTATE_90``.
-_EPL2_TO_PIL_TRANSPOSE: dict[int, int] = {
-    0: -1,  # sentinel: no transpose
+# ``ROTATE_270`` and EPL2 3 (270 CW) maps to ``ROTATE_90``. Code ``0`` is
+# handled via an early-return in :func:`rotate_quarter` and omitted here.
+_EPL2_TO_PIL_TRANSPOSE: dict[int, Image.Transpose] = {
     1: Image.Transpose.ROTATE_270,
     2: Image.Transpose.ROTATE_180,
     3: Image.Transpose.ROTATE_90,

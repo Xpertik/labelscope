@@ -39,9 +39,7 @@ def test_render_1d_code128_prepends_subset_b_sentinel(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     captured = _make_fake_treepoem(monkeypatch)
-    barcodes.render_1d(
-        "code128", "W1A/1000260", narrow=1, height=4, human_readable=False
-    )
+    barcodes.render_1d("code128", "W1A/1000260", narrow=1, height=4, human_readable=False)
     assert captured["barcode_type"] == "code128"
     assert captured["data"] == "^104W1A/1000260"
     assert captured["options"]["parse"] is True
@@ -52,9 +50,7 @@ def test_render_1d_upca_does_not_add_sentinel(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     captured = _make_fake_treepoem(monkeypatch)
-    barcodes.render_1d(
-        "upca", "01234567890", narrow=1, height=4, human_readable=True
-    )
+    barcodes.render_1d("upca", "01234567890", narrow=1, height=4, human_readable=True)
     assert captured["barcode_type"] == "upca"
     assert captured["data"] == "01234567890"
     assert "parse" not in captured["options"]
@@ -67,9 +63,7 @@ def test_render_1d_scales_width_by_narrow_and_height_exact(
     """Narrow scales width; height sets vertical dots exactly."""
     _make_fake_treepoem(monkeypatch)
     # fake treepoem returns an 8x4 image. narrow=3 -> width=24; height=35 -> h=35.
-    img = barcodes.render_1d(
-        "code128", "X", narrow=3, height=35, human_readable=False
-    )
+    img = barcodes.render_1d("code128", "X", narrow=3, height=35, human_readable=False)
     assert img.size == (24, 35)
     assert img.mode == "1"
 
@@ -105,6 +99,4 @@ def test_render_2d_magnifies_via_nearest(monkeypatch: pytest.MonkeyPatch) -> Non
 def test_missing_treepoem_raises(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setitem(sys.modules, "treepoem", None)
     with pytest.raises(barcodes.BarcodeBackendMissing):
-        barcodes.render_1d(
-            "code128", "X", narrow=1, height=4, human_readable=False
-        )
+        barcodes.render_1d("code128", "X", narrow=1, height=4, human_readable=False)
