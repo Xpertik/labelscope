@@ -1,0 +1,22 @@
+R0,0
+N
+Q270,24
+q430
+S2
+A22,8,0,2,1,1,N,"Premium Alpaca Tri-Color Crew "
+A22,30,0,2,1,1,N,"Therapeutic Unisex Socks With "
+A22,52,0,2,1,1,N,"Reinforcement And Cushioned "
+A22,74,0,3,1,1,N,"Navy - Powder Blue – Natural"
+A375,38,0,4,1,1,R,"L/XL"
+A22,96,0,2,1,1,N,"59% Alpaca / 25% Acrylic / "
+A22,118,0,2,1,1,N,"3% Nylon / 7% Spandex / 6% "
+A22,140,0,2,1,1,N,"Elastic "
+B180,130,0,1B,1,2,35,N,"W3A/2773216"
+A180,180,0,2,1,1,N,"W3A-2773216"
+A186,210,0,2,1,1,N,"MADE IN PERU"
+A156,240,0,2,1,1,N,"ClassicAlpaca.com"
+A400,120,1,2,1,1,N,"RN-145804"
+b52,130,Q,"https://classicalpaca.com/help/qr/?s=ht&m=b&v=0XF&k=40454"
+A22,240,0,2,1,1,N,"V7-40454"
+A30,135,1,2,1,1,N,"$12.00"
+P1,1

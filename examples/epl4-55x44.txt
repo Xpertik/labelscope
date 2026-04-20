@@ -1,0 +1,19 @@
+R0,0
+N
+Q355,24
+q445
+S2
+A437,8,1,2,1,1,N,"Alpaca Cable Fingerless "
+A417,8,1,2,1,1,N,"Gloves "
+A397,8,1,2,1,1,N,"Color: Denim"
+A377,8,1,2,1,1,N,"Size: O/S"
+A357,8,1,2,1,1,N,"Composition: 100% Alpaca "
+A337,8,1,2,1,1,N,"Superfine. "
+B148,277,0,1B,1,2,35,N,"W1A/1000260"
+A163,320,0,2,1,1,N,"W1A-1000260"
+A237,65,1,2,1,1,N,"MADE IN PERU"
+A217,86,1,2,1,1,N,"RN-145804"
+A197,36,1,2,1,1,N,"ClassicAlpaca.com"
+b77,90,Q,"https://classicalpaca.com/help/qr/?s=ht&m=b&v=0XF&k=5"
+A18,8,1,1,1,1,N,"V7-5"
+P1,1

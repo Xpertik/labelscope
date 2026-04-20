@@ -32,3 +32,6 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+# EPL2 manual PDF (26MB — sourced from Zebra, not checked in; see docs/epl2-reference.md for the scoped reference used by the renderer)
+*.pdf

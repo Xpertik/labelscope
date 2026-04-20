@@ -1,0 +1,18 @@
+R0,0
+N
+Q270,24
+q430
+S2
+A22,8,0,2,1,1,N,"Alpaca Cable Fingerless Gloves"
+A22,30,0,3,1,1,N,"Denim"
+A375,38,0,4,1,1,R,"O/S"
+A22,52,0,2,1,1,N,"100% Alpaca Superfine."
+B180,130,0,1B,1,2,35,N,"W1A/1000260"
+A180,180,0,2,1,1,N,"W1A-1000260"
+A186,210,0,2,1,1,N,"MADE IN PERU"
+A156,240,0,2,1,1,N,"ClassicAlpaca.com"
+A400,120,1,2,1,1,N,"RN-145804"
+b52,130,Q,"https://classicalpaca.com/help/qr/?s=ht&m=b&v=0XF&k=5"
+A22,240,0,2,1,1,N,"V7-5"
+P1,1
+
