@@ -16,6 +16,7 @@ authors = [
 keywords = ["epl2", "zpl", "thermal-printer", "zebra", "label", "preview", "barcode"]
 classifiers = [
     "Development Status :: 4 - Beta",
+    "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
@@ -25,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Printing",
     "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Hardware",
 ]
 dependencies = [
     "Pillow>=10.0",
@@ -40,15 +42,18 @@ dev = [
     "pytest-regressions",
     "ruff",
     "mypy",
+    "build",
+    "twine",
 ]
 
 [project.scripts]
 labelscope = "labelscope.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/xpertik/labelscope"
-Repository = "https://github.com/xpertik/labelscope"
-Issues = "https://github.com/xpertik/labelscope/issues"
+Homepage = "https://github.com/Xpertik/labelscope"
+Repository = "https://github.com/Xpertik/labelscope"
+Issues = "https://github.com/Xpertik/labelscope/issues"
+Documentation = "https://github.com/Xpertik/labelscope#readme"
 
 [tool.hatch.build.targets.wheel]
 packages = ["labelscope"]

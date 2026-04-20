@@ -31,6 +31,57 @@ img = render(Path("examples/epl1-55x34.txt").read_bytes())
 img.save("epl1.png", optimize=True, compress_level=9)
 ```
 
+## Examples
+
+Render a committed fixture via the `Renderer` class:
+
+```python
+from pathlib import Path
+
+from labelscope import Renderer
+
+renderer = Renderer(dpi=203)
+img = renderer.render_file(Path("examples/epl1-55x34.txt"))
+img.save("my_label.png", optimize=True, compress_level=9)
+```
+
+Render from an in-memory EPL2 string (useful when generating labels in
+your app):
+
+```python
+from labelscope import Renderer
+
+source = (
+    "N\n"
+    "q430\n"
+    "Q270,24\n"
+    'A22,8,0,3,1,1,N,"Hello labelscope"\n'
+    'B52,60,0,1B,2,2,40,N,"SKU-00042"\n'
+    "P1,1\n"
+)
+Renderer().render(source).save("hello.png", optimize=True, compress_level=9)
+```
+
+CLI, against the bundled fixtures:
+
+```bash
+labelscope render examples/epl1-55x34.txt -o preview.png
+labelscope validate examples/epl2-55x34.txt
+labelscope info examples/epl3-55x34.txt
+```
+
+### Supported fixtures
+
+Real-world labels committed under `examples/` (size is `width_mm x height_mm`):
+
+- `epl1-55x34.txt` — Alpaca garment tag: text + Code 128 + QR.
+- `epl2-55x34.txt` — Multi-line garment tag with tri-color copy.
+- `epl3-55x34.txt` — Yarn 6-pack tag with enlarged Code 128.
+- `epl4-55x44.txt` — Rotated (portrait) garment tag with QR.
+- `epl5-38x25.txt` — Compact `ZB` (bottom-fed) label, narrow web.
+- `epl6-38x25.txt` — Compact `ZB` variant with short Code 128 payload.
+- `epl7-38x25.txt` — Text-only compact `ZB` label.
+
 ## CLI
 
 ```bash
